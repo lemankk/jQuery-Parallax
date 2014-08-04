@@ -9,6 +9,11 @@ Plugin URL: http://www.ianlunn.co.uk/plugins/jquery-parallax/
 Dual licensed under the MIT and GPL licenses:
 http://www.opensource.org/licenses/mit-license.php
 http://www.gnu.org/licenses/gpl.html
+
+Modified by LMSWork
+Author: Leman Kwok
+Twitter: @LemanKwok
+Author URL: http://lmswork.com
 */
 
 (function( $ ){
@@ -19,6 +24,31 @@ http://www.gnu.org/licenses/gpl.html
 		windowHeight = $window.height();
 	});
 
+	var ins = [];
+
+
+	var flag = 0;
+	// function to be called whenever the window is scrolled or resized
+	function update(){
+		if( flag < 1){
+			flag = 0;
+			return;
+		}
+		flag --;
+		
+		$(ins).each(function(){
+			this.update();
+		});
+	}
+
+	function onScroll(){
+		flag ++;
+	}
+
+	setInterval(update, 1000/60);
+	$window.bind('scroll', onScroll).resize(onScroll);
+	update();
+
 	$.fn.parallax = function(xpos, speedFactor, outerHeight) {
 		var $this = $(this);
 		var getHeight;
@@ -27,7 +57,7 @@ http://www.gnu.org/licenses/gpl.html
 		
 		//get the starting position of each element to have parallax applied to it		
 		$this.each(function(){
-		    firstTop = $this.offset().top;
+			firstTop = $this.offset().top;
 		});
 
 		if (outerHeight) {
@@ -45,8 +75,9 @@ http://www.gnu.org/licenses/gpl.html
 		if (arguments.length < 2 || speedFactor === null) speedFactor = 0.1;
 		if (arguments.length < 3 || outerHeight === null) outerHeight = true;
 		
-		// function to be called whenever the window is scrolled or resized
-		function update(){
+
+		this.update = function(){
+
 			var pos = $window.scrollTop();				
 
 			$this.each(function(){
@@ -55,15 +86,16 @@ http://www.gnu.org/licenses/gpl.html
 				var height = getHeight($element);
 
 				// Check if totally above or totally below viewport
-				if (top + height < pos || top > pos + windowHeight) {
-					return;
-				}
+				//if (top + height < pos || top > pos + windowHeight) {
+					//return;
+				//}
 
-				$this.css('backgroundPosition', xpos + " " + Math.round((firstTop - pos) * speedFactor) + "px");
+				$this.css('backgroundPosition', xpos + " " + Math.round((top - pos) * speedFactor) + "px");
 			});
-		}		
+		};
 
-		$window.bind('scroll', update).resize(update);
-		update();
+		ins.push( this );
+
+
 	};
-})(jQuery);
+}(jQuery));
